@@ -2,10 +2,10 @@
 -- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jan 26, 2022 at 11:58 AM
--- Server version: 10.4.22-MariaDB
--- PHP Version: 8.0.13
+-- Host: localhost
+-- Waktu pembuatan: 28 Jan 2022 pada 17.48
+-- Versi server: 10.4.22-MariaDB
+-- Versi PHP: 8.0.13
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,75 +24,62 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `artikel`
+-- Struktur dari tabel `artikel`
 --
 
 CREATE TABLE `artikel` (
   `id` int(11) NOT NULL,
   `title` varchar(100) NOT NULL,
-  `shortRiview` text DEFAULT NULL,
-  `imgUrl` varchar(200) NOT NULL,
-  `idCategori` int(11) NOT NULL,
+  `shortreview` text DEFAULT NULL,
+  `imgurl` varchar(200) NOT NULL,
+  `publicid` varchar(200) NOT NULL,
+  `idcategory` int(11) NOT NULL,
   `medium` varchar(100) DEFAULT NULL,
   `github` varchar(100) DEFAULT NULL,
   `creator` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `artikel`
---
-
-INSERT INTO `artikel` (`id`, `title`, `shortRiview`, `imgUrl`, `idCategori`, `medium`, `github`, `creator`) VALUES
-(2, 'Buah buah', 'buah Berbiji', 'biji.jpg', 2, 'bijiKembar123', 'haa biji', 'always rendy'),
-(3, 'sausage man', 'sosis berbulu', 'sosis Loyo.3gp', 3, 'sosisHot', 'sosis Tegang', 'rendy dwi ');
-
 -- --------------------------------------------------------
 
 --
--- Table structure for table `category`
+-- Struktur dari tabel `category`
 --
 
 CREATE TABLE `category` (
   `id` int(11) NOT NULL,
-  `nameCategory` varchar(100) NOT NULL,
-  `baseColor` varchar(100) NOT NULL
+  `namecategory` varchar(100) NOT NULL,
+  `basecolor` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `category`
+-- Dumping data untuk tabel `category`
 --
 
-INSERT INTO `category` (`id`, `nameCategory`, `baseColor`) VALUES
-(1, 'xiaomi redmi', 'red');
+INSERT INTO `category` (`id`, `namecategory`, `basecolor`) VALUES
+(1, 'nodejs', '0xff4E9F3D');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `contribution`
+-- Struktur dari tabel `contribution`
 --
 
 CREATE TABLE `contribution` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `job` varchar(100) NOT NULL,
-  `imgUrl` varchar(100) NOT NULL,
+  `imgurl` varchar(100) NOT NULL,
+  `publicid` varchar(200) NOT NULL,
   `instagram` varchar(100) DEFAULT NULL,
   `medium` varchar(100) DEFAULT NULL,
   `github` varchar(100) DEFAULT NULL,
   `linkedin` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `contribution`
---
-
-INSERT INTO `contribution` (`id`, `name`, `job`, `imgUrl`, `instagram`, `medium`, `github`, `linkedin`) VALUES
-(1, 'xsann arifki', 'programmer', 'xontolLoyo.jpg', 'sannnn', 'ganpuad', 'lololo', 'gadue sat');
-
 -- --------------------------------------------------------
 
 --
--- Table structure for table `user`
+-- Struktur dari tabel `user`
 --
 
 CREATE TABLE `user` (
@@ -104,39 +91,60 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`id`, `name`, `userName`, `password`, `token`) VALUES
-(1, 'xsannn', 'iksanairkfi', 'iksanGanteng123', 'oranggantengStockterakhir');
-
---
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `artikel`
+-- Indeks untuk tabel `artikel`
 --
 ALTER TABLE `artikel`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `category`
+-- Indeks untuk tabel `category`
 --
 ALTER TABLE `category`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `contribution`
+-- Indeks untuk tabel `contribution`
 --
 ALTER TABLE `contribution`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `user`
+-- Indeks untuk tabel `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT untuk tabel yang dibuang
+--
+
+--
+-- AUTO_INCREMENT untuk tabel `artikel`
+--
+ALTER TABLE `artikel`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT untuk tabel `category`
+--
+ALTER TABLE `category`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT untuk tabel `contribution`
+--
+ALTER TABLE `contribution`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT untuk tabel `user`
+--
+ALTER TABLE `user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -1,68 +1,11 @@
 const express = require("express");
-const db = require("../models/db");
+const controller = require("../controller/indexController");
 const router = express.Router();
 
-// menampilkan semua data
-router.get("/", (req, res) => {
-  let sql = "SELECT * FROM category";
-  db.query(sql, (err, result) => {
-    if (err) throw err;
-    res.json(result);
-  });
-});
-// mendapatakan data sesuai ID
-router.get("/:id", (req, res) => {
-  const id = req.params.id;
-  let sql = "SELECT * FROM category WHERE id = ?";
-  db.query(sql, id, (err, result) => {
-    if (err) {
-      res.json({ message: err });
-    } else {
-      res.send(result);
-    }
-  });
-});
-// tambah data
-router.post("/", (req, res) => {
-  const id = req.body.id;
-  const nameCategory = req.body.nameCategory;
-  const baseColor = req.body.baseColor;
-
-  let sql = "INSERT INTO category(id,nameCategory,baseColor,) VALUES (?,?,?)";
-  db.query(sql, [id, nameCategory, baseColor], (err, result) => {
-    if (err) {
-      res.json({ message: err });
-    } else {
-      res.send(`data telah di tambah kategori ${id}`);
-    }
-  });
-});
-
-// edit data
-router.put("/", (req, res) => {
-  const id = req.body.id;
-  const nameCategory = req.body.nameCategory;
-  const baseColor = req.body.baseColor;
-  let sql = "UPDATE category SET nameCategory = ?, baseColor = ? WHERE id = ?";
-  db.query(sql, [nameCategory, baseColor, id], (err, result) => {
-    if (err) {
-      res.json({ message: err });
-    } else {
-      res.json(`data berhasil di edit pada id ${id}`);
-    }
-  });
-});
-
-router.delete("/:id", (req, res) => {
-  const id = req.params.id;
-  let sql = "DELETE FROM category WHERE id = ?";
-  db.query(sql, id, (err, result) => {
-    if (err) {
-      res.json({ message: err });
-    } else {
-      res.send(`data berhasil di hapus pada id ${id}`);
-    }
-  });
-});
+router.get("/", controller.category.getCategory);
+router.get("/:id", controller.category.findById);
+router.post("/", controller.category.createNew);
+router.put("/", controller.category.editAt);
+router.delete("/", controller.category.deleteAt);
 
 module.exports = router;

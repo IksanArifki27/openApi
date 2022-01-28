@@ -1,22 +1,47 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const db = require("./models/db");
-const artikel = require("./routers/artikel");
-const category = require("./routers/category");
-const contribution = require("./routers/contribution");
-const user = require("./routers/user");
+const morgan = require("morgan");
 const app = express();
-const port = 3000;
+
+// memanggil route
+const artikelRoute = require("./routers/artikel");
+const categoryRoute = require("./routers/category");
 
 // midleware
+app.use(morgan("dev"));
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: false }));
 
-app.use("/artikel", artikel);
-app.use("/category", category);
-app.use("/contribution", contribution);
-app.use("/user", user);
-
-app.listen(port, () => {
-  console.log(`server run port ${port}`);
+app.use("/artikel", artikelRoute);
+app.use("/category", categoryRoute);
+// app.use("/contribution", contribution);
+// app.use("/user", user);
+app.get("/", (req, res) => {
+  res.send({
+    "/artikel": {
+      get: "/",
+      get: "/123",
+      post: "/",
+      put: "/",
+      delete: "/",
+    },
+    "/category": {
+      get: "/",
+      get: "/123",
+      post: "/",
+      put: "/",
+      delete: "/",
+    },
+  });
 });
+// semua path error akan kesini
+app.use((req, res, next) => {
+  const err = new Error(`${req.url} not found in this server`);
+  err.status = 404;
+  next(err);
+});
+app.use((err, req, res, next) => {
+  res.status(err.status || 500).json({ error: err.message });
+});
+
+module.exports = app;
