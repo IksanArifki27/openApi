@@ -20,6 +20,25 @@ controller.getAll = async function (req, res) {
     res.send(404).json({ message: error });
   }
 };
+controller.getNew = async function (req, res) {
+  try {
+    await model.artikel
+      .findAll({
+        limit: 4,
+        include: [{ model: model.category }],
+        order: ["id", "DESC"],
+      })
+      .then((result) => {
+        if (result.length > 0) {
+          res.status(200).json({ message: "connection succed", data: result });
+        } else {
+          res.status(404).json({ message: "data empty", data: [] });
+        }
+      });
+  } catch (error) {
+    res.send(404).json({ message: error });
+  }
+};
 // mendapatakan data sesuai ID
 controller.getById = async function (req, res) {
   try {
@@ -29,7 +48,7 @@ controller.getById = async function (req, res) {
           id: req.params.id,
         },
         limit: 1,
-        include: [{ model: model.category }],
+        include: [{ model: model.category, required: true }],
       })
       .then((result) => {
         if (result.length > 0) {
@@ -45,37 +64,27 @@ controller.getById = async function (req, res) {
 // tambah data
 controller.createNew = async function (req, res, file) {
   try {
-    const artikelCheck = await model.artikel.findAll({
-      where: {
-        id: req.body.id,
-      },
+    const uploadImage = await cloudinary.uploader.upload(req.file.path, {
+      public_id: `${req.body.nama}_profile`,
+      width: 500,
+      height: 500,
+      crop: "fill",
     });
 
-    if (artikelCheck.length > 0) {
-      res.status(500).json({ message: "data already in use" });
-    } else {
-      const uploadImage = await cloudinary.uploader.upload(req.file.path, {
-        public_id: `${req.body.nama}_profile`,
-        width: 500,
-        height: 500,
-        crop: "fill",
+    if (uploadImage) {
+      let artikel = await model.artikel.create({
+        title: req.body.title,
+        shortreview: req.body.shortreview,
+        imgurl: uploadImage.url,
+        publicid: uploadImage.public_id,
+        idcategory: req.body.idcategory,
+        medium: req.body.medium,
+        github: req.body.github,
+        creator: req.body.creator,
       });
-
-      if (uploadImage) {
-        let artikel = await model.artikel.create({
-          title: req.body.title,
-          shortreview: req.body.shortreview,
-          imageurl: uploadImage.url,
-          public_id: uploadImage.public_id,
-          idcategory: req.body.idcategory,
-          medium: req.body.medium,
-          github: req.body.github,
-          creator: req.body.creator,
-        });
-        res.status(201).json({ message: "success", data: artikel });
-      } else {
-        res.status(500).json({ message: "failed upload image" });
-      }
+      res.status(201).json({ message: "success", data: artikel });
+    } else {
+      res.status(500).json({ message: "failed upload image" });
     }
   } catch (error) {
     res.status(404).json({ message: error });
@@ -85,24 +94,94 @@ controller.createNew = async function (req, res, file) {
 // edit data
 controller.editAt = async function (req, res) {
   try {
-    let artikel = await model.artikel.update(
-      {
-        title: req.body.title,
-        shortreview: req.body.shortreview,
-        imageurl: uploadImage.url,
-        public_id: uploadImage.public_id,
-        idcategory: req.body.idcategory,
-        medium: req.body.medium,
-        github: req.body.github,
-        creator: req.body.creator,
+    var data = await model.artikel.findAll({
+      where: {
+        id: req.body.id,
       },
-      {
-        where: {
-          id: req.body.id,
-        },
+      include: [{ model: model.category }],
+    });
+    var cekCategory = await model.category.findAll({
+      where: {
+        id: req.body.idcategory,
+      },
+    });
+    if (data.length > 0 && cekCategory.length > 0) {
+      if (!req.file) {
+        await model.artikel.update(
+          {
+            title: req.body.title,
+            shortreview: req.body.shortreview,
+            imgurl: data[0].imgurl,
+            publicid: data[0].publicid,
+            idcategory: req.body.idcategory,
+            medium: req.body.medium,
+            github: req.body.github,
+            creator: req.body.creator,
+          },
+          {
+            where: {
+              id: req.body.id,
+            },
+          }
+        );
+        res.status(201).json({
+          message: "success",
+          data: {
+            title: req.body.title,
+            shortreview: req.body.shortreview,
+            imgurl: data[0].imgurl,
+            publicid: data[0].publicid,
+            idcategory: req.body.idcategory,
+            medium: req.body.medium,
+            github: req.body.github,
+            creator: req.body.creator,
+          },
+        });
+      } else {
+        const uploadImage = await cloudinary.uploader.upload(req.file.path, {
+          public_id: `${req.body.nama}_profile`,
+          width: 500,
+          height: 500,
+          crop: "fill",
+        });
+        if (uploadImage) {
+          await model.artikel.update(
+            {
+              title: req.body.title,
+              shortreview: req.body.shortreview,
+              imgurl: uploadImage.url,
+              publicid: uploadImage.public_id,
+              idcategory: req.body.idcategory,
+              medium: req.body.medium,
+              github: req.body.github,
+              creator: req.body.creator,
+            },
+            {
+              where: {
+                id: req.body.id,
+              },
+            }
+          );
+          res.status(201).json({
+            message: "success",
+            data: {
+              title: req.body.title,
+              shortreview: req.body.shortreview,
+              imgurl: uploadImage.url,
+              publicid: uploadImage.public_id,
+              idcategory: req.body.idcategory,
+              medium: req.body.medium,
+              github: req.body.github,
+              creator: req.body.creator,
+            },
+          });
+        } else {
+          res.status(500).json({ message: "failed upload image" });
+        }
       }
-    );
-    res.status(200).json({ message: "success" });
+    } else {
+      res.status(404).json({ message: "data empty", data: [] });
+    }
   } catch (error) {
     res.status(404).json({ message: error });
   }
@@ -121,4 +200,4 @@ controller.deleteAt = function (req, res) {
   }
 };
 
-module.exports = controller
+module.exports = controller;
