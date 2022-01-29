@@ -6,7 +6,7 @@ var db = new sequelize(
   process.env.DB_USER,
   process.env.DB_PASSWORD,
   {
-    dialect: 'mysql',
+    dialect: "mysql",
     host: process.env.DB_HOST,
   }
 );

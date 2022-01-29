@@ -6,6 +6,8 @@ const app = express();
 // memanggil route
 const artikelRoute = require("./routers/artikel");
 const categoryRoute = require("./routers/category");
+const contributionRoute = require("./routers/contribution");
+const { contribution } = require("./model/indexModel");
 
 // midleware
 app.use(morgan("dev"));
@@ -14,6 +16,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/artikel", artikelRoute);
 app.use("/category", categoryRoute);
+app.use("/contribution", contributionRoute);
+
 // app.use("/contribution", contribution);
 // app.use("/user", user);
 app.get("/", (req, res) => {
@@ -26,6 +30,13 @@ app.get("/", (req, res) => {
       delete: "/",
     },
     "/category": {
+      get: "/",
+      get: "/123",
+      post: "/",
+      put: "/",
+      delete: "/",
+    },
+    "/contribution": {
       get: "/",
       get: "/123",
       post: "/",

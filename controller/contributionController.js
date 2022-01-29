@@ -1,100 +1,125 @@
-// const express = require("express");
-// const db = require("../models/db");
-// const multer = require("multer");
-// const path = require("path");
-// const router = express.Router();
+const model = require("../model/indexModel");
+const { op } = require("sequelize");
+const cloudinary = require("../middleware/cloudinaryHelper");
 
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "images");
-//   },
-//   filename: (req, file, cb) => {
-//     console.log(file);
-//     cb(null, Date.now + path.extname(file.originalname));
-//   },
-// });
-// const upload = multer({ storage: storage });
+const controller = {};
 
-// // menampilkan semua data
-// router.get("/", (req, res) => {
-//   let sql = "SELECT * FROM contribution";
-//   db.query(sql, (err, result) => {
-//     if (err) throw err;
-//     res.json(result);
-//   });
-// });
-// // mendapatakan data sesuai ID
-// router.get("/:id", (req, res) => {
-//   const id = req.params.id;
-//   let sql = "SELECT * FROM contribution WHERE id = ?";
-//   db.query(sql, id, (err, result) => {
-//     if (err) {
-//       res.json({ message: err });
-//     } else {
-//       res.send(result);
-//     }
-//   });
-// });
-// // tambah data
-// router.post("/", upload.single("imgUrl"), (req, res) => {
-//   const id = req.body.id;
-//   const name = req.body.name;
-//   const job = req.body.job;
-//   const imgUrl = req.body.imgUrl;
-//   const instagram = req.body.instagram;
-//   const medium = req.body.medium;
-//   const github = req.body.github;
-//   const linkedin = req.body.linkedin;
-//   let sql =
-//     "INSERT INTO contribution(id,name,job,imgUrl,instagram,medium,github,linkedin) VALUES (?,?,?,?,?,?,?,?)";
-//   db.query(
-//     sql,
-//     [id, name, job, imgUrl, instagram, medium, github, linkedin],
-//     (err, result) => {
-//       if (err) {
-//         res.json({ message: err });
-//       } else {
-//         res.send(`data telah di tambah kategori ${id}`);
-//       }
-//     }
-//   );
-// });
+// tampilkan semua data
+controller.getAll = async function (req, res) {
+  try {
+    await model.contribution
+      .findAll({ include: [{ model: model.category }] })
+      .then((result) => {
+        if (result.length > 0) {
+          res.status(200).json({ message: "connection succed", data: result });
+        } else {
+          res.status(404).json({ message: "data empty", data: [] });
+        }
+      });
+  } catch (error) {
+    res.send(404).json({ message: error });
+  }
+};
+// dapat kan data sesuai id
+controller.getById = async function (req, res) {
+  try {
+    await model.contribution
+      .findAll({
+        where: {
+          id: req.params.id,
+        },
+        limit: 1,
+        include: [{ model: model.category }],
+      })
+      .then((result) => {
+        if (result.length > 0) {
+          res.status(200).json({ message: "connection succed", data: result });
+        } else {
+          res.status(404).json({ message: "data empty", data: [] });
+        }
+      });
+  } catch (error) {
+    res.send(404).json({ message: error });
+  }
+};
 
-// // edit data
-// router.put("/", (req, res) => {
-//   const id = req.body.id;
-//   const name = req.body.name;
-//   const job = req.body.job;
-//   const imgUrl = req.body.imgUrl;
-//   const instagram = req.body.instagram;
-//   const medium = req.body.medium;
-//   const github = req.body.github;
-//   const linkedin = req.body.linkedin;
-//   let sql =
-//     "UPDATE contribution SET name = ?, job = ?, imgUrl = ?, instagram = ?, medium =  ?, github = ?, linkedin = ? WHERE id = ?";
-//   db.query(
-//     sql,
-//     [name, job, imgUrl, instagram, medium, github, linkedin, id],
-//     (err, result) => {
-//       if (err) {
-//         res.json({ message: err });
-//       } else {
-//         res.json(`data berhasil di edit pada id ${id}`);
-//       }
-//     }
-//   );
-// });
+// tambah data
+controller.createNew = async function (req, res, file) {
+  try {
+    const contributionCheck = await model.contribution.findAll({
+      where: {
+        id: req.body.id,
+      },
+    });
 
-// router.delete("/:id", (req, res) => {
-//   const id = req.params.id;
-//   let sql = "DELETE FROM contribution WHERE id = ?";
-//   db.query(sql, id, (err, result) => {
-//     if (err) {
-//       res.json({ message: err });
-//     } else {
-//       res.send(`data berhasil di hapus pada id ${id}`);
-//     }
-//   });
-// });
+    if (contributionCheck.length > 0) {
+      res.status(500).json({ message: "data already in use" });
+    } else {
+      const uploadImage = await cloudinary.uploader.upload(req.file.path, {
+        public_id: `${req.body.nama}_profile`,
+        width: 500,
+        height: 500,
+        crop: "fill",
+      });
 
-// module.exports = router;
+      if (uploadImage) {
+        let contribution = await model.contribution.create({
+          name: req.body.name,
+          job: req.body.job,
+          imageurl: uploadImage.url,
+          public_id: uploadImage.public_id,
+          instagram: req.body.instagram,
+          medium: req.body.medium,
+          github: req.body.github,
+          linkedin: req.body.linkedin,
+        });
+        res.status(201).json({ message: "success", data: contribution });
+      } else {
+        res.status(500).json({ message: "failed upload image" });
+      }
+    }
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
+};
+
+// edit data
+controller.editData = async function (req, res) {
+  try {
+    let artikel = await model.artikel.update(
+      {
+        name: req.body.name,
+        job: req.body.job,
+        imageurl: uploadImage.url,
+        public_id: uploadImage.public_id,
+        instagram: req.body.instagram,
+        medium: req.body.medium,
+        github: req.body.github,
+        linkedin: req.body.linkedin,
+      },
+      {
+        where: {
+          id: req.body.id,
+        },
+      }
+    );
+    res.status(200).json({ message: "success update data" });
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
+};
+
+controller.deleteData = function (req, res) {
+  try {
+    let artikel = model.artikel.destroy({
+      where: {
+        id: req.body.id,
+      },
+    });
+    res.status(200).json({ message: "success delete data" });
+  } catch (error) {
+    res.status(404).json({ message: error });
+  }
+};
+
+module.exports = controller;
