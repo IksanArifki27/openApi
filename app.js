@@ -8,6 +8,7 @@ const artikelRoute = require("./routers/artikel");
 const categoryRoute = require("./routers/category");
 const contributionRoute = require("./routers/contribution");
 const { contribution } = require("./model/indexModel");
+const userRoute = require("./routers/user");
 
 // midleware
 app.use(morgan("dev"));
@@ -17,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use("/artikel", artikelRoute);
 app.use("/category", categoryRoute);
 app.use("/contribution", contributionRoute);
+app.use("/user", userRoute);
 
 // app.use("/contribution", contribution);
 // app.use("/user", user);
@@ -37,6 +39,13 @@ app.get("/", (req, res) => {
       delete: "/",
     },
     "/contribution": {
+      get: "/",
+      get: "/123",
+      post: "/",
+      put: "/",
+      delete: "/",
+    },
+    "/user": {
       get: "/",
       get: "/123",
       post: "/",
